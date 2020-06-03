@@ -22,8 +22,10 @@ export async function deletePhotoById(req: Request, res: Response):Promise<Respo
     const photo = await Photo.findByIdAndDelete(id)
 
     if (photo) {
-        await fse.unlink(path.resolve(photo.imagePath))
-        console.log('foto borrada')
+        if (photo?.imagePath) {
+            await fse.unlink(path.resolve(photo.imagePath))
+            console.log('foto borrada')
+        }
     }
     return res.json({message: 'Foto borrada', photo})
 }
