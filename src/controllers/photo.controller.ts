@@ -24,7 +24,6 @@ export async function deletePhotoById(req: Request, res: Response):Promise<Respo
     if (photo) {
         if (photo?.imagePath) {
             await fse.unlink(path.resolve(photo.imagePath))
-            console.log('foto borrada')
         }
     }
     return res.json({message: 'Foto borrada', photo})
@@ -32,7 +31,6 @@ export async function deletePhotoById(req: Request, res: Response):Promise<Respo
 
 export async function createPhoto(req: Request, res: Response):Promise<Response> {
     const { title, description } = req.body
-    console.log(req.file)
 
     const newPhoto = {
         title,
@@ -53,7 +51,6 @@ export async function updatePhoto(req: Request, res: Response): Promise<Response
     const { id } = req.params;
     const { title, description } = req.body
     let imagePath = req.file?.path
-    // console.log(title, description)
     
     let updateNewPhoto = null
     let oldPhoto:{title: string, description: string, imagePath:string} | null = { title: '', description: '', imagePath: '' }
