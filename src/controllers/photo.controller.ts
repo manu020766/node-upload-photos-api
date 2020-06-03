@@ -1,5 +1,5 @@
 import { Request, Response} from 'express'
-import Photo from '../models/Photo'
+import Photo, { IPhoto } from '../models/Photo'
 import fse, { fstat } from 'fs-extra' 
 import path from 'path'
 
@@ -50,16 +50,29 @@ export async function createPhoto(req: Request, res: Response):Promise<Response>
 export async function updatePhoto(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
     const { title, description } = req.body
+    let imagePath = req.file?.path
     console.log(title, description)
-
-    const newPhoto = {
-        title,
-        description,
-        imagePath: req.file.path
+    
+    let updateNewPhoto = null
+    let newPhoto:{title: string, description: string, imagePath:string} | null = { title: '', description: '', imagePath: '' }
+    newPhoto = await Photo.findById(id)
+   
+    if (newPhoto) {
+        if (title) newPhoto.title = title
+        if (description) newPhoto.description = description
+        if (imagePath) {
+            if (newPhoto.imagePath) {
+                await fse.unlink(path.resolve(newPhoto.imagePath))
+            }
+            newPhoto.imagePath = imagePath
+        }
+        try {
+            await Photo.findByIdAndUpdate(req.params.id, newPhoto)
+            updateNewPhoto = await Photo.findById(id)
+        } catch (error) {
+            console.log(error)
+        }
     }
-
-    await Photo.findByIdAndUpdate(req.params.id, newPhoto)
-    let updateNewPhoto = await Photo.findById(id)
 
     return res.json({
         message: 'Successfully updated',

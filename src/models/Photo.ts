@@ -6,7 +6,7 @@ const schema = new Schema({
     imagePath: String
 })
 
-interface IPhoto extends Document {
+export interface IPhoto extends Document {
     title: string
     description: string
     imagePath: string
