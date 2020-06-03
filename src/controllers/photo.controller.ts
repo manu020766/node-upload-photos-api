@@ -35,7 +35,7 @@ export async function createPhoto(req: Request, res: Response):Promise<Response>
     const newPhoto = {
         title,
         description,
-        imagePath: req.file.path
+        imagePath: req.file?.path
     }
 
     const photo = new Photo(newPhoto)
@@ -51,17 +51,22 @@ export async function updatePhoto(req: Request, res: Response): Promise<Response
     const { id } = req.params;
     const { title, description } = req.body
     let imagePath = req.file?.path
-    console.log(title, description)
+    // console.log(title, description)
     
     let updateNewPhoto = null
+    let oldPhoto:{title: string, description: string, imagePath:string} | null = { title: '', description: '', imagePath: '' }
     let newPhoto:{title: string, description: string, imagePath:string} | null = { title: '', description: '', imagePath: '' }
-    newPhoto = await Photo.findById(id)
-   
-    if (newPhoto) {
+    oldPhoto = await Photo.findById(id)
+
+    if (oldPhoto) {
+        if(oldPhoto.title) newPhoto.title = oldPhoto.title
+        if(oldPhoto.description) newPhoto.description = oldPhoto.description
+        if(oldPhoto.imagePath) newPhoto.imagePath = oldPhoto.imagePath
+
         if (title) newPhoto.title = title
         if (description) newPhoto.description = description
         if (imagePath) {
-            if (newPhoto.imagePath) {
+            if (oldPhoto.imagePath) {
                 await fse.unlink(path.resolve(newPhoto.imagePath))
             }
             newPhoto.imagePath = imagePath
