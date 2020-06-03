@@ -1,18 +1,18 @@
 import { Request, Response} from 'express'
-import Photo, { IPhoto } from '../models/Photo'
-import fse, { fstat } from 'fs-extra' 
+import Photo from '../models/Photo'
+import fse from 'fs-extra' 
 import path from 'path'
 
-export async function getPhoto(req: Request, res: Response):Promise<Response> {
+export async function getPhotos(req: Request, res: Response):Promise<Response> {
     const photos = await Photo.find()
 
     return res.json(photos)
 }
 
 export async function getPhotoById(req: Request, res: Response):Promise<Response> {
-    const  idPhoto  = req.params.id
+    const { id }  = req.params
 
-    const photo = await Photo.findById(idPhoto)
+    const photo = await Photo.findById(id)
     return res.json(photo)
 }
 
@@ -31,11 +31,12 @@ export async function deletePhotoById(req: Request, res: Response):Promise<Respo
 
 export async function createPhoto(req: Request, res: Response):Promise<Response> {
     const { title, description } = req.body
+    let imagePath = req.file?.path
 
     const newPhoto = {
         title,
         description,
-        imagePath: req.file?.path
+        imagePath: imagePath
     }
 
     const photo = new Photo(newPhoto)
@@ -52,27 +53,25 @@ export async function updatePhoto(req: Request, res: Response): Promise<Response
     const { title, description } = req.body
     let imagePath = req.file?.path
     
-    let updateNewPhoto = null
     let oldPhoto:{title: string, description: string, imagePath:string} | null = { title: '', description: '', imagePath: '' }
-    let newPhoto:{title: string, description: string, imagePath:string} | null = { title: '', description: '', imagePath: '' }
+    let updatePhoto:{title: string, description: string, imagePath:string} | null = { title: '', description: '', imagePath: '' }
     oldPhoto = await Photo.findById(id)
 
     if (oldPhoto) {
-        if(oldPhoto.title) newPhoto.title = oldPhoto.title
-        if(oldPhoto.description) newPhoto.description = oldPhoto.description
-        if(oldPhoto.imagePath) newPhoto.imagePath = oldPhoto.imagePath
+        if(oldPhoto.title) updatePhoto.title = oldPhoto.title
+        if(oldPhoto.description) updatePhoto.description = oldPhoto.description
+        if(oldPhoto.imagePath) updatePhoto.imagePath = oldPhoto.imagePath
 
-        if (title) newPhoto.title = title
-        if (description) newPhoto.description = description
+        if (title) updatePhoto.title = title
+        if (description) updatePhoto.description = description
         if (imagePath) {
             if (oldPhoto.imagePath) {
-                await fse.unlink(path.resolve(newPhoto.imagePath))
+                await fse.unlink(path.resolve(updatePhoto.imagePath))
             }
-            newPhoto.imagePath = imagePath
+            updatePhoto.imagePath = imagePath
         }
         try {
-            await Photo.findByIdAndUpdate(req.params.id, newPhoto)
-            updateNewPhoto = await Photo.findById(id)
+            await Photo.findByIdAndUpdate(req.params.id, updatePhoto)
         } catch (error) {
             console.log(error)
         }
@@ -80,7 +79,7 @@ export async function updatePhoto(req: Request, res: Response): Promise<Response
 
     return res.json({
         message: 'Successfully updated',
-        updateNewPhoto
+        updatePhoto
     })
 }
 
