@@ -16,6 +16,19 @@ export async function getPhotoById(req: Request, res: Response):Promise<Response
     return res.json(photo)
 }
 
+export async function getPhotoByTitleDes(req:Request, res:Response):Promise<Response> {
+    const { id } = req.params
+
+    const photos = await Photo.find({
+        $or: [
+          { title: { $regex: id } },
+          { description: { $regex: id } }
+        ]
+      })
+
+    return res.json(photos)
+}
+
 export async function deletePhotoById(req: Request, res: Response):Promise<Response> {
     const  { id }  = req.params
 
