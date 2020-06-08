@@ -21,8 +21,8 @@ export async function getPhotoByTitleDes(req:Request, res:Response):Promise<Resp
 
     const photos = await Photo.find({
         $or: [
-          { title: { $regex: id } },
-          { description: { $regex: id } }
+          { title: { $regex: id, $options: "i"  } },
+          { description: { $regex: id, $options: "i"  } }
         ]
       })
 
