@@ -92,7 +92,7 @@ export async function updatePhoto(req: Request, res: Response): Promise<Response
 
     return res.json({
         message: 'Successfully updated',
-        updatePhoto
+        photo: updatePhoto
     })
 }
 
